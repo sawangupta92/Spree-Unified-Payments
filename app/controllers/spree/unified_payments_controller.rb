@@ -7,7 +7,7 @@ module Spree
   class UnifiedPaymentsController < StoreController
     include UnifiedTransactionHelper
 
-    before_filter :ensure_valid_order, :only => [:new, :create]    
+    before_filter :ensure_valid_order, :only => [:new, :create]
     skip_before_filter :verify_authenticity_token, :only => [:approved, :declined, :canceled]
 
     before_filter :load_info_on_return, :only => [:declined, :canceled, :approved]

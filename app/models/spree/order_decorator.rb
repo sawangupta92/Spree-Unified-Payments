@@ -13,14 +13,9 @@ Spree::Order.class_eval do
   #over writing this method to release inventory units before being deleted in case reserved
   def create_proposed_shipments
     release_inventory
+    all_adjustments.shipping.delete_all
     shipments.destroy_all
-
-    packages = Spree::Stock::Coordinator.new(self).packages
-    packages.each do |package|
-      shipments << package.to_shipment
-    end
-
-    shipments
+    self.shipments = Spree::Stock::Coordinator.new(self).shipments
   end
 
   def reason_if_cant_pay_by_card
@@ -35,14 +30,14 @@ Spree::Order.class_eval do
     touch :completed_at
 
     # lock all adjustments (coupon promotions, etc.)
-    adjustments.each { |adjustment| adjustment.update_column('state', "closed") }
+    adjustments.each { |adjustment| adjustment.close }
 
     # update payment states, and save
     updater.update_payment_state
-    reserve_stock unless previous_states.last == :confirm
+    reserve_stock #unless previous_states.last == :confirm
 
     updater.update_shipment_state
-    save
+    save!
     updater.run_hooks
 
     deliver_order_confirmation_email
@@ -58,7 +53,7 @@ Spree::Order.class_eval do
   def reserve_stock
     shipments.each do |shipment|
       #to reserve stock only if it has not been reserved already.
-      if shipment.inventory_units.any? { |inventory_unit| inventory_unit.pending == true }
+      if shipment.inventory_units.any? { |inventory_unit| inventory_unit.pending }
         shipment.update!(self)
         shipment.finalize!
       end

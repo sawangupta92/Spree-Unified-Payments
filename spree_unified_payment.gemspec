@@ -1,11 +1,11 @@
 Gem::Specification.new do |s|
   s.platform  = Gem::Platform::RUBY
   s.name      = "spree_unified_payment"
-  s.version   = "1.2.0"
-  s.author    = ["Manish Kangia", "Sushant Mittal"]
+  s.version   = "1.3.0"
+  s.author    = ["Sawan Gupta", "Manish Kangia", "Sushant Mittal"]
   s.email     = 'info@vinsol.com'
   s.homepage  = 'http://vinsol.com'
-  s.license   = 'MIT' 
+  s.license   = 'MIT'
 
   s.summary     = "Integrate payment using UnifiedPayment service"
   s.description = "Enable spree store to allow payment via UnifiedPayment"
@@ -16,8 +16,8 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.requirements << 'none'
 
-  s.add_dependency('spree_core', '~> 2.2.0')
+  s.add_dependency('spree_core', '~> 3.0.0')
   s.add_dependency 'unified_payment', '1.1.0'
-  s.add_dependency 'spree_wallet', '~> 2.2.0'
+  s.add_dependency 'spree_wallet', '~> 3.0.0'
   s.add_dependency 'delayed_job_active_record', '~> 4.0.0'
 end
