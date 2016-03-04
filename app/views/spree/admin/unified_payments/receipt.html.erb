@@ -13,9 +13,9 @@
     <tr>
       <td>Order Description</td>
       <% if @order.line_items.count == 1 %>
-        <td>Payment for <%= @order.line_items.first.product.name + " at #{Spree::Config[:site_name]}"%></td>
+        <td>Payment for <%= @order.line_items.first.product.name + " at #{Spree::Store.first.name}"%></td>
       <% else %>
-        <td>Payment for <%= @order.line_items.count.to_s + " products at #{Spree::Config[:site_name]}"%></td>
+        <td>Payment for <%= @order.line_items.count.to_s + " products at #{Spree::Store.first.name}"%></td>
       <% end %>
     </tr>
   </table>

@@ -1,6 +1,6 @@
 module Spree
   class PaymentMethod::UnifiedPaymentMethod < PaymentMethod
-    
+
     def actions
       %w{capture void}
     end

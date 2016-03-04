@@ -22,7 +22,7 @@ module Spree
     end
 
     def create
-      response = UnifiedPayment::Transaction.create_order_at_unified(@order.total, { :approve_url => approved_unified_payments_url, :cancel_url => canceled_unified_payments_url, :decline_url => declined_unified_payments_url, :description => "Purchasing items from #{Spree::Config[:site_name]}" })
+      response = UnifiedPayment::Transaction.create_order_at_unified(@order.total, { :approve_url => approved_unified_payments_url, :cancel_url => canceled_unified_payments_url, :decline_url => declined_unified_payments_url, :description => "Purchasing items from #{Spree::Store.first.name}" })
       if response
         @payment_url = UnifiedPayment::Transaction.extract_url_for_unified_payment(response)
         tasks_on_gateway_create_response(response, session[:transaction_id])

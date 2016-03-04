@@ -15,13 +15,16 @@ gem 'sass-rails'
 gem 'unified_payment', github: 'vinsol/Unified-Payments', tag: '1.1.0'
 
 gem 'delayed_job_active_record', :tag => 'v4.0.0'
+gem 'httparty'
 
 group :test do
-  gem 'rspec-rails', '~> 3.0'
-  gem 'shoulda-matchers', '~> 3.1'
+  gem 'rspec-rails', '~> 3.3.3'
+  gem 'shoulda-matchers', '~> 3.1.1'
   gem 'simplecov', :require => false
   gem 'database_cleaner'
   gem 'rspec-html-matchers'
+  gem 'rspec-activemodel-mocks', '~> 1.0.3'
   gem 'test-unit'
+  gem 'byebug'
 end
 gemspec

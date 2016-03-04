@@ -7,43 +7,45 @@ describe Spree::CheckoutController do
   let(:order) { Spree::Order.new }
   let(:payment) { mock_model(Spree::Payment) }
   let(:variant) { mock_model(Spree::Variant, :name => 'test-variant') }
+  let!(:store) { Spree::Store.create!(mail_from_address: 'test@testmail.com', code: '1234', name: 'test', url: 'www.test.com') }
 
   before(:each) do
-    controller.stub(:spree_current_user).and_return(user)
-    user.stub(:generate_spree_api_key!).and_return(true)
-    controller.stub(:authenticate_spree_user!).and_return(true)
-    user.stub(:roles).and_return(roles)
-    controller.stub(:authorize!).and_return(true)
-    roles.stub(:includes).and_return(roles)
-    role.stub(:ability).and_return(true)
-    user.stub(:last_incomplete_spree_order).and_return(nil)
-    controller.stub(:load_order).and_return(true)
-    controller.stub(:load_order_with_lock).and_return(true)
-    controller.stub(:ensure_order_not_completed).and_return(true)
-    controller.stub(:ensure_checkout_allowed).and_return(true)
-    controller.stub(:ensure_sufficient_stock_lines).and_return(true)
-    controller.stub(:ensure_valid_state).and_return(true)
-    controller.stub(:ensure_active_variants).and_return(true)
+    allow(controller).to receive(:spree_current_user).and_return(user)
+    allow(user).to receive(:generate_spree_api_key!).and_return(true)
+    allow(controller).to receive(:authenticate_spree_user!).and_return(true)
+    allow(user).to receive(:roles).and_return(roles)
+    allow(controller).to receive(:authorize!).and_return(true)
+    allow(roles).to receive(:includes).and_return(roles)
+    allow(role).to receive(:ability).and_return(true)
+    allow(user).to receive(:last_incomplete_spree_order).and_return(nil)
+    allow(controller).to receive(:load_order).and_return(true)
+    allow(controller).to receive(:load_order_with_lock).and_return(true)
+    allow(controller).to receive(:ensure_order_not_completed).and_return(true)
+    allow(controller).to receive(:ensure_checkout_allowed).and_return(true)
+    allow(controller).to receive(:ensure_sufficient_stock_lines).and_return(true)
+    allow(controller).to receive(:ensure_valid_state).and_return(true)
+    allow(controller).to receive(:ensure_active_variants).and_return(true)
 
-    controller.stub(:associate_user).and_return(true)
-    controller.stub(:check_authorization).and_return(true)
-    controller.stub(:object_params).and_return('object_params')
-    controller.stub(:after_update_attributes).and_return(false)
+    allow(controller).to receive(:associate_user).and_return(true)
+    allow(controller).to receive(:check_authorization).and_return(true)
+    allow(controller).to receive(:object_params).and_return('object_params')
+    allow(controller).to receive(:after_update_attributes).and_return(false)
     controller.instance_variable_set(:@order, order)
-    order.stub(:has_checkout_step?).with('payment').and_return(true)
-    order.stub(:payment?).and_return(false)
-    order.stub(:update_attributes).and_return(false)
-    order.stub(:update_attributes).with({"payments_attributes"=>[{"payment_method_id"=>"1"}]}).and_return(false)
+    allow(order).to receive(:has_checkout_step?).with('payment').and_return(true)
+    allow(order).to receive(:payment?).and_return(false)
+    allow(order).to receive(:update_attributes).and_return(false)
+    allow(order).to receive(:update_attributes).with({"payments_attributes"=>[{"payment_method_id"=>"1"}]}).and_return(false)
     @payments = [payment]
-    @payments.stub(:reload).and_return(true)
-    @payments.stub(:completed).and_return([])
-    @payments.stub(:valid).and_return([])
+    allow(@payments).to receive(:reload).and_return(true)
+    allow(@payments).to receive(:completed).and_return([])
+    allow(@payments).to receive(:valid).and_return([])
     @payment_method = mock_model(Spree::PaymentMethod, :type => 'Spree::PaymentMethod::UnifiedPaymentMethod')
-    payment.stub(:payment_method).and_return(@payment_method)
-    order.stub(:payments).and_return(@payments)
-    order.stub(:next).and_return(true)
-    order.stub(:completed?).and_return(false)
-    order.stub(:state).and_return('payment')
+    allow(payment).to receive(:payment_method).and_return(@payment_method)
+    allow(order).to receive(:payments).and_return(@payments)
+    allow(order).to receive(:next).and_return(true)
+    allow(order).to receive(:completed?).and_return(false)
+    allow(order).to receive(:state).and_return('payment')
+    allow(user).to receive(:orders).and_return(order)
   end
 
   describe '#redirect_for_card_payment' do
@@ -53,35 +55,35 @@ describe Spree::CheckoutController do
 
     context 'if payment state' do
       before do
-        @payment_method.stub(:is_a?).with(Spree::PaymentMethod::UnifiedPaymentMethod).and_return(true)
+        allow(@payment_method).to receive(:is_a?).with(Spree::PaymentMethod::UnifiedPaymentMethod).and_return(true)
       end
 
       context 'when params[:order].present?' do
-        before { Spree::PaymentMethod.stub(:where).with(:id => '1').and_return([@payment_method]) }
+        before { allow(Spree::PaymentMethod).to receive(:where).with(:id => '1').and_return([@payment_method]) }
 
         describe 'method calls' do
-          it { order.should_receive(:update_attributes).with({"payments_attributes"=>[{"payment_method_id"=>"1"}]}).and_return(false) }
-          it { @payment_method.should_receive(:is_a?).with(Spree::PaymentMethod::UnifiedPaymentMethod).and_return(true) }
-          it { Spree::PaymentMethod.should_receive(:where).with(:id => '1').and_return([@payment_method]) }
-          it { order.should_not_receive(:update) }
+          it { expect(order).to receive(:update_attributes).with({"payments_attributes"=>[{"payment_method_id"=>"1", "request_env"=>{}}]}).and_return(false) }
+          it { expect(@payment_method).to receive(:is_a?).with(Spree::PaymentMethod::UnifiedPaymentMethod).and_return(true) }
+          it { expect(Spree::PaymentMethod).to receive(:where).with(:id => '1').and_return([@payment_method]) }
+          it { expect(order).not_to receive(:update) }
           after { send_request({"order"=>{"payments_attributes"=>[{"payment_method_id"=>"1"}]}, "state"=>"payment"}) }
         end
 
         it 'should redirect to unified_payment#new' do
           send_request({"order"=>{"payments_attributes"=>[{"payment_method_id"=>"1"}]}, "state"=>"payment"})
-          response.should redirect_to(new_unified_transaction_path)
+          expect(response).to redirect_to(new_unified_transaction_path)
         end
       end
-      
+
       context 'when !params[:order].present?' do
         it 'should not redirect to unified_payment#new' do
           send_request({"state" => "payment"})
-          response.should_not redirect_to(new_unified_transaction_path)
+          expect(response).not_to redirect_to(new_unified_transaction_path)
         end
 
         describe 'method calls' do
-          it { order.should_receive(:update_attributes).with({}).exactly(1).times.and_return(true) }
-          it { Spree::PaymentMethod.should_receive(:where).with(:id => nil).and_return([]) }
+          it { expect(order).to receive(:update_attributes).with({}).exactly(1).times.and_return(true) }
+          it { expect(Spree::PaymentMethod).to receive(:where).with(:id => nil).and_return([]) }
           after do
             send_request({"state" => "payment"})
           end
@@ -91,13 +93,13 @@ describe Spree::CheckoutController do
       context 'when !params[:order][:payments_attributes].present?' do
         it 'should not redirect to pay_by_card#new' do
           send_request({"state" => "payment"})
-          response.should_not redirect_to(new_unified_transaction_path)
+          expect(response).not_to redirect_to(new_unified_transaction_path)
         end
 
         describe 'method calls' do
-          it { order.should_not_receive(:update) }
-          it { order.should_receive(:update_attributes).with({"payments_attributes"=>[{}]}).exactly(1).times.and_return(true) }
-          it { Spree::PaymentMethod.should_receive(:where).with(:id => nil).and_return([]) }
+          it { expect(order).not_to receive(:update) }
+          it { expect(order).to receive(:update_attributes).with({"payments_attributes"=>[{"request_env" => request.env}]}).exactly(1).times.and_return(true) }
+          it { expect(Spree::PaymentMethod).to receive(:where).with(:id => nil).and_return([]) }
           after do
             send_request({"order"=>{"payments_attributes"=>[{}]}, "state"=>"payment"})
           end
@@ -106,9 +108,12 @@ describe Spree::CheckoutController do
     end
 
     context 'if not payment state' do
-      it { Spree::PaymentMethod.should_not_receive(:where).with(:id => '1') }
-      it { controller.should_not_receive(:redirect_for_card_payment) }
-      
+      before(:each) do
+        allow(order).to receive(:has_checkout_step?).with('delivery').and_return(true)
+      end
+      it { expect(Spree::PaymentMethod).not_to receive(:where).with(:id => '1') }
+      it { expect(controller).not_to receive(:redirect_for_card_payment) }
+
       after do
         send_request({"order"=>{"payments_attributes"=>[{"payment_method_id"=>"1"}]}, "state"=>"delivery"})
       end
